@@ -9,7 +9,6 @@ This project automates the process of fetching weather data, cleaning and standa
 4. [BigQuery Setup](#bigquery-setup)
 5. [Cron Jobs Setup](#cron-jobs-setup)
 6. [Make Automation](#make-automation)
-7. [Future Enhancements](#future-enhancements)
 
 ---
 
@@ -64,7 +63,6 @@ OPENWEATHER_API_KEY=your_openweather_api_key
 OPENAI_API_KEY=your_openai_api_key
 GOOGLE_APPLICATION_CREDENTIALS=path_to_your_google_cloud_credentials.json
 ```
----
 
 ## **Dependencies**
 
@@ -212,7 +210,7 @@ To automate this process, you can schedule the query to run daily at **6:03 AM U
 
 This will ensure that every morning at 6:03 AM UTC, the table is updated with the latest rainy locations for the day.
 
-### **Cron Job Setup for Running Python Code**
+### **Cron Jobs Setup**
 
 To automate the weather data retrieval and insertion into BigQuery, you can set up a **cron job** to run the Python script (`main.py`) on your local machine.
 
@@ -229,8 +227,6 @@ crontab -e
 Make sure to replace `/path/to/your/venv` with the actual path to your Python virtual environment and `/path/to/your/project` with the path to your project directory.
 
 3. Save and exit the editor. This will execute the Python script every day at **5:55 AM UTC**, which will fetch the weather data and insert it into BigQuery.
-
----
 
 ## **Make Automation**
 
