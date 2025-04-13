@@ -230,27 +230,53 @@ Make sure to replace `/path/to/your/venv` with the actual path to your Python vi
 
 ## **Make Automation**
 
-Once the daily weather data is available in BigQuery, you can set up an automation workflow in **Make** (formerly known as Integromat) to send the daily rainy forecasts to your email.
+Once the daily weather data is available in BigQuery, you can set up an automation workflow in Make (formerly known as Integromat) to send the daily rainy forecasts to your email.
 
-### **1. Create a Make (formerly Integromat) Account:**
-If you don’t already have an account, sign up for free at [https://make.com](https://make.com).
+### 1. Create a Make (formerly Integromat) Account:
+If you don’t already have an account, sign up for free at [Make](https://make.com).
 
-### **2. Create a Scenario in Make:**
+### 2. Create a Scenario in Make:
+Create a new scenario in Make and follow these steps to set up the workflow (or import the `make_blueprint.json`)
 
-1. **Create a new scenario**.
-2. Add the following modules to the scenario:
+#### Add the following modules to the scenario:
 
-   - **Module 1**: **List Table Data (BigQuery)**  
-     This module will retrieve data from the `daily_rainy_forecasts` table in BigQuery. It will fetch the rainy forecasts for the day.
-   
-   - **Module 2**: **Text Aggregator**  
-     This module will combine the retrieved data into a single formatted message (i.e., all rainy forecasts for the day).
-   
-   - **Module 3**: **Send an Email**  
-     This module will send the formatted message to your email address.
+- **Module 1: List Table Data (BigQuery)**  
+  This module will retrieve data from the `daily_rainy_forecasts` table in BigQuery. It fetches the rainy forecasts for the day.
 
-### **3. Set up Automation to Run Daily (some time after the Daily Rainy Forecast scheduled query, I put at 9am CET) :**
-After creating the scenario, set the automation to run daily at **9:00 AM CET**. This will ensure you receive a daily email with the weather forecast for rainy locations.
+- **Module 2: Text Aggregator**  
+  This module will combine the retrieved data into a single formatted message (i.e., all rainy forecasts for the day) using the following template:
+  
+  ```html
+  <p> <b> {{1.city}} </b> - {{1.forecast_summary}} </p>
+   ```
+
+### Module 3: Router
+
+The **Router** module in Make (formerly known as Integromat) is used to handle different cases based on the filtered data. In this case, we use the Router to decide whether to send an email with the rainy weather forecast or a fallback email if no rainy cities are found.
+
+#### **Route 1: Send Email with Rainy Forecasts**
+
+This route is triggered if there are rainy capitals in the data. The condition to check for rainy capitals is `If there are rainy capitals`. If this condition is met, the scenario proceeds to send an email with the rainy weather updates for Europe capitals.
+
+##### **Email Message:**
+
+```html
+<p>This is your rainy daily weather update on Europe Capitals. Please find details below </p>
+{{6.text}}
+```
+
+#### **Route 2: Send Email for Sunny Europe**
+
+This route is triggered if there are no rainy capitals in the data.
+
+##### **Email Message:**
+
+```html
+<p>Enjoy Sunny Europe!</p>
+```
+
+### **3. Set up Automation to Run Daily (some time after the Daily Rainy Forecast scheduled query) :**
+After creating the scenario, set the automation to run daily (for example at **9:00 AM CET**). This will ensure you receive a daily email with the weather forecast for rainy locations.
 
 ---
 

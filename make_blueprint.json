@@ -1,0 +1,517 @@
+{
+    "name": "Integration BigQuery",
+    "flow": [
+        {
+            "id": 1,
+            "module": "google-bigquery:listTableData1",
+            "version": 1,
+            "parameters": {
+                "__IMTCONN__": 2320522
+            },
+            "mapper": {
+                "project": "usecase-weather-project",
+                "limit": "100",
+                "dataset": "weather_data",
+                "table": "daily_rainy_forecasts"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 0,
+                    "y": 150
+                },
+                "restore": {
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "label": "My Google connection (mickovska.eleni@gmail.com)",
+                            "data": {
+                                "scoped": "true",
+                                "connection": "google"
+                            }
+                        }
+                    },
+                    "expect": {
+                        "project": {
+                            "mode": "chose",
+                            "label": "UseCase Weather Project"
+                        },
+                        "dataset": {
+                            "mode": "chose",
+                            "label": "weather_data"
+                        },
+                        "table": {
+                            "mode": "chose",
+                            "label": "daily_rainy_forecasts"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:google",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "project",
+                        "type": "select",
+                        "label": "Project ID",
+                        "required": true
+                    },
+                    {
+                        "name": "limit",
+                        "type": "uinteger",
+                        "label": "Limit"
+                    },
+                    {
+                        "name": "dataset",
+                        "type": "select",
+                        "label": "Dataset ID",
+                        "required": true
+                    },
+                    {
+                        "name": "table",
+                        "type": "select",
+                        "label": "Table ID",
+                        "required": true
+                    }
+                ],
+                "interface": [
+                    {
+                        "name": "__IMTLENGTH__",
+                        "label": "Total number of bundles",
+                        "type": "uinteger"
+                    },
+                    {
+                        "name": "__IMTINDEX__",
+                        "label": "Bundle order position",
+                        "type": "uinteger"
+                    },
+                    {
+                        "name": "city",
+                        "type": "text"
+                    },
+                    {
+                        "name": "temperature",
+                        "type": "number"
+                    },
+                    {
+                        "name": "weather",
+                        "type": "text"
+                    },
+                    {
+                        "name": "timestamp",
+                        "type": "timestamp"
+                    },
+                    {
+                        "name": "forecast_summary",
+                        "type": "text"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 6,
+            "module": "util:TextAggregator",
+            "version": 1,
+            "parameters": {
+                "rowSeparator": "\n",
+                "feeder": 1
+            },
+            "mapper": {
+                "value": "<p> <b> {{1.city}} </b> - {{1.forecast_summary}} </p>"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 385,
+                    "y": 147
+                },
+                "restore": {
+                    "parameters": {
+                        "rowSeparator": {
+                            "label": "New row"
+                        }
+                    },
+                    "extra": {
+                        "feeder": {
+                            "label": "BigQuery - List Table Data [1]"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "rowSeparator",
+                        "type": "select",
+                        "label": "Row separator",
+                        "validate": {
+                            "enum": [
+                                "\n",
+                                "\t",
+                                "other"
+                            ]
+                        }
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "value",
+                        "type": "text",
+                        "label": "Text"
+                    }
+                ],
+                "interface": [
+                    {
+                        "name": "text",
+                        "type": "text",
+                        "help": "Text"
+                    }
+                ],
+                "advanced": true
+            }
+        },
+        {
+            "id": 7,
+            "module": "builtin:BasicRouter",
+            "version": 1,
+            "parameters": {
+                "else": 1
+            },
+            "mapper": null,
+            "metadata": {
+                "designer": {
+                    "x": 684,
+                    "y": 149
+                }
+            },
+            "routes": [
+                {
+                    "flow": [
+                        {
+                            "id": 4,
+                            "module": "google-email:ActionSendEmail",
+                            "version": 2,
+                            "parameters": {
+                                "account": 2335507
+                            },
+                            "filter": {
+                                "name": "If there are rainy capitals",
+                                "conditions": [
+                                    [
+                                        {
+                                            "a": "{{6.text}}",
+                                            "o": "exist"
+                                        }
+                                    ]
+                                ]
+                            },
+                            "mapper": {
+                                "from": "",
+                                "to": [
+                                    "mickovska.eleni@gmail.com"
+                                ],
+                                "subject": "Rainy Weather Forecast for Today [Europe Capitals]",
+                                "html": "<p>This is your rainy daily weather update on Europe Capitals. Please find details below </p>\n\n{{6.text}}",
+                                "attachments": [],
+                                "cc": [],
+                                "bcc": []
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 1118,
+                                    "y": -52
+                                },
+                                "restore": {
+                                    "parameters": {
+                                        "account": {
+                                            "label": "My Google Restricted connection (mickovska.eleni@gmail.com)",
+                                            "data": {
+                                                "scoped": "true",
+                                                "connection": "google-restricted"
+                                            }
+                                        }
+                                    },
+                                    "expect": {
+                                        "to": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null
+                                            ]
+                                        },
+                                        "attachments": {
+                                            "mode": "chose"
+                                        },
+                                        "cc": {
+                                            "mode": "chose"
+                                        },
+                                        "bcc": {
+                                            "mode": "chose"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "account",
+                                        "type": "account:google-restricted",
+                                        "label": "Connection",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "from",
+                                        "type": "text",
+                                        "label": "From"
+                                    },
+                                    {
+                                        "name": "to",
+                                        "type": "array",
+                                        "label": "To",
+                                        "required": true,
+                                        "spec": {
+                                            "name": "value",
+                                            "type": "email",
+                                            "label": "Email address",
+                                            "required": true
+                                        }
+                                    },
+                                    {
+                                        "name": "subject",
+                                        "type": "text",
+                                        "label": "Subject"
+                                    },
+                                    {
+                                        "name": "html",
+                                        "type": "text",
+                                        "label": "Content"
+                                    },
+                                    {
+                                        "name": "attachments",
+                                        "type": "array",
+                                        "label": "Attachments",
+                                        "spec": [
+                                            {
+                                                "name": "fileName",
+                                                "label": "File name",
+                                                "type": "filename",
+                                                "required": true,
+                                                "semantic": "file:name"
+                                            },
+                                            {
+                                                "name": "data",
+                                                "label": "Data",
+                                                "type": "buffer",
+                                                "required": true,
+                                                "semantic": "file:data"
+                                            },
+                                            {
+                                                "name": "cid",
+                                                "label": "Content-ID",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "name": "cc",
+                                        "type": "array",
+                                        "label": "Copy recipient",
+                                        "spec": {
+                                            "type": "email",
+                                            "label": "Email address",
+                                            "name": "value"
+                                        }
+                                    },
+                                    {
+                                        "name": "bcc",
+                                        "type": "array",
+                                        "label": "Blind copy recipient",
+                                        "spec": {
+                                            "type": "email",
+                                            "label": "Email address",
+                                            "name": "value"
+                                        }
+                                    }
+                                ],
+                                "interface": [
+                                    {
+                                        "name": "messageId",
+                                        "label": "Message ID",
+                                        "type": "text"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "flow": [
+                        {
+                            "id": 8,
+                            "module": "google-email:ActionSendEmail",
+                            "version": 2,
+                            "parameters": {
+                                "account": 2335507
+                            },
+                            "mapper": {
+                                "from": "",
+                                "to": [
+                                    "mickovska.eleni@gmail.com"
+                                ],
+                                "subject": "Rainy Weather Forecast for Today [Europe Capitals]",
+                                "html": "Enjoy Sunny Europe!",
+                                "attachments": [],
+                                "cc": [],
+                                "bcc": []
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 1131,
+                                    "y": 331
+                                },
+                                "restore": {
+                                    "parameters": {
+                                        "account": {
+                                            "label": "My Google Restricted connection (mickovska.eleni@gmail.com)",
+                                            "data": {
+                                                "scoped": "true",
+                                                "connection": "google-restricted"
+                                            }
+                                        }
+                                    },
+                                    "expect": {
+                                        "to": {
+                                            "mode": "chose",
+                                            "items": [
+                                                null
+                                            ]
+                                        },
+                                        "attachments": {
+                                            "mode": "chose"
+                                        },
+                                        "cc": {
+                                            "mode": "chose"
+                                        },
+                                        "bcc": {
+                                            "mode": "chose"
+                                        }
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "account",
+                                        "type": "account:google-restricted",
+                                        "label": "Connection",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "from",
+                                        "type": "text",
+                                        "label": "From"
+                                    },
+                                    {
+                                        "name": "to",
+                                        "type": "array",
+                                        "label": "To",
+                                        "required": true,
+                                        "spec": {
+                                            "name": "value",
+                                            "type": "email",
+                                            "label": "Email address",
+                                            "required": true
+                                        }
+                                    },
+                                    {
+                                        "name": "subject",
+                                        "type": "text",
+                                        "label": "Subject"
+                                    },
+                                    {
+                                        "name": "html",
+                                        "type": "text",
+                                        "label": "Content"
+                                    },
+                                    {
+                                        "name": "attachments",
+                                        "type": "array",
+                                        "label": "Attachments",
+                                        "spec": [
+                                            {
+                                                "name": "fileName",
+                                                "label": "File name",
+                                                "type": "filename",
+                                                "required": true,
+                                                "semantic": "file:name"
+                                            },
+                                            {
+                                                "name": "data",
+                                                "label": "Data",
+                                                "type": "buffer",
+                                                "required": true,
+                                                "semantic": "file:data"
+                                            },
+                                            {
+                                                "name": "cid",
+                                                "label": "Content-ID",
+                                                "type": "text"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "name": "cc",
+                                        "type": "array",
+                                        "label": "Copy recipient",
+                                        "spec": {
+                                            "type": "email",
+                                            "label": "Email address",
+                                            "name": "value"
+                                        }
+                                    },
+                                    {
+                                        "name": "bcc",
+                                        "type": "array",
+                                        "label": "Blind copy recipient",
+                                        "spec": {
+                                            "type": "email",
+                                            "label": "Email address",
+                                            "name": "value"
+                                        }
+                                    }
+                                ],
+                                "interface": [
+                                    {
+                                        "name": "messageId",
+                                        "label": "Message ID",
+                                        "type": "text"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "instant": false,
+        "version": 1,
+        "scenario": {
+            "roundtrips": 1,
+            "maxErrors": 3,
+            "autoCommit": true,
+            "autoCommitTriggerLast": true,
+            "sequential": false,
+            "slots": null,
+            "confidential": false,
+            "dataloss": false,
+            "dlq": false,
+            "freshVariables": false
+        },
+        "designer": {
+            "orphans": []
+        },
+        "zone": "eu1.make.com",
+        "notes": []
+    }
+}
