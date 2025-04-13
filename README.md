@@ -250,7 +250,7 @@ Create a new scenario in Make and follow these steps to set up the workflow (or 
   <p> <b> {{1.city}} </b> - {{1.forecast_summary}} </p>
    ```
 
-### Module 3: Router
+- **Module 3: Router**  
 
 The **Router** module in Make (formerly known as Integromat) is used to handle different cases based on the filtered data. In this case, we use the Router to decide whether to send an email with the rainy weather forecast or a fallback email if no rainy cities are found.
 
