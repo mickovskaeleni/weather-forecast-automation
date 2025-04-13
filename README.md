@@ -286,7 +286,7 @@ This project is licensed under the MIT License.
 
 ---
 
-This section of the README covers the **`daily_rainy_forecasts`** table, the scheduling of the query to filter rainy locations, the cron job setup for running the Python script, and how to automate the daily email notifications using Make. This ensures that you receive daily updates about rainy locations.
+This section of the README covers the **`daily_rainy_forecasts`** table, the scheduling of the query to filter rainy locations, the cron job setup for running the Python script, and how to automate the daily email notifications using Make. This ensures that you receive daily updates about rainy locations (capitals) in Europe.
 
 ---
 
