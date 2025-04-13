@@ -272,7 +272,7 @@ This route is triggered if there are no rainy capitals in the data.
 ##### **Email Message:**
 
 ```html
-<p>Enjoy Sunny Europe!</p>
+<p>No rain expected in any Europian capital!</p>
 ```
 
 ### **3. Set up Automation to Run Daily (some time after the Daily Rainy Forecast scheduled query) :**
