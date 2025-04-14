@@ -169,21 +169,32 @@ SELECT * FROM final_cleaned_data;
 ```
 ### **Query 2: Daily Rainy Forecasts**
 
-This query filters the `weather_forecast_cleaned` table to include only rainy locations for the current day. The query runs daily at **6:03 AM UTC** and stores the result in the `daily_rainy_forecasts` table.
+This query filters the `weather_forecast_cleaned` table to include only rainy locations for the current day (only most recent records per day per city). The query runs daily at **6:03 AM UTC** and stores the result in the `daily_rainy_forecasts` table.
 
 ```sql
 CREATE OR REPLACE TABLE `usecase-weather-project.weather_data.daily_rainy_forecasts` AS
+WITH latest_weather AS (
+    SELECT 
+        city,
+        temperature,
+        weather,
+        DATE(timestamp) AS forecast_date,  -- Extract the date part of the timestamp
+        forecast_summary,
+        ROW_NUMBER() OVER (PARTITION BY city, DATE(timestamp) ORDER BY timestamp DESC) AS row_num  -- Get the most recent record per city and day
+    FROM 
+        `usecase-weather-project.weather_data.weather_forecast_cleaned`
+    WHERE
+        LOWER(weather) LIKE '%rain%'  -- Filter for rainy weather
+)
+
 SELECT 
     city,
     temperature,
     weather,
-    timestamp,
+    forecast_date,  -- Use the date part of the timestamp
     forecast_summary
-FROM 
-    `usecase-weather-project.weather_data.weather_forecast_cleaned`
-WHERE
-    LOWER(weather) LIKE '%rain%' 
-    AND DATE(timestamp) = CURRENT_DATE();
+FROM latest_weather
+WHERE row_num = 1;  -- Only keep the latest record for each city per day
 ```
 ### **Table: `daily_rainy_forecasts`**
 
@@ -194,7 +205,7 @@ The table contains the following columns:
 - **`city`**: The name of the city (e.g., "Prague").
 - **`temperature`**: The current temperature in that city, measured in Celsius.
 - **`weather`**: The weather description (e.g., "light rain", "overcast clouds").
-- **`timestamp`**: The timestamp when the weather data was recorded.
+- **`forecast_date`**: The date when the weather data was recorded.
 - **`forecast_summary`**: A human-readable summary of the weather forecast for the city, generated using OpenAI's GPT model.
 
 ### **Scheduled Query Setup for Daily Rainy Forecasts**
