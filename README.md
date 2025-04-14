@@ -236,47 +236,10 @@ Once the daily weather data is available in BigQuery, you can set up an automati
 If you don’t already have an account, sign up for free at [Make](https://make.com).
 
 ### 2. Create a Scenario in Make:
-Create a new scenario in Make and follow these steps to set up the workflow (or import the `make_blueprint.json`)
-
-#### Add the following modules to the scenario:
-
-- **Module 1: List Table Data (BigQuery)**  
-  This module will retrieve data from the `daily_rainy_forecasts` table in BigQuery. It fetches the rainy forecasts for the day.
-
-- **Module 2: Text Aggregator**  
-  This module will combine the retrieved data into a single formatted message (i.e., all rainy forecasts for the day) using the following template:
-  
-  ```html
-  <p> <b> {{1.city}} </b> - {{1.forecast_summary}} </p>
-   ```
-
-- **Module 3: Router**  
-
-The **Router** module in Make (formerly known as Integromat) is used to handle different cases based on the filtered data. In this case, we use the Router to decide whether to send an email with the rainy weather forecast or a fallback email if no rainy cities are found.
-
-#### **Route 1: Send Email with Rainy Forecasts**
-
-This route is triggered if there are rainy capitals in the data. The condition to check for rainy capitals is `If there are rainy capitals`. If this condition is met, the scenario proceeds to send an email with the rainy weather updates for Europe capitals.
-
-##### **Email Message:**
-
-```html
-<p>This is your rainy daily weather update on Europe Capitals. Please find details below </p>
-{{6.text}}
-```
-
-#### **Route 2: Send Email for Sunny Europe**
-
-This route is triggered if there are no rainy capitals in the data.
-
-##### **Email Message:**
-
-```html
-<p>No rain expected in any Europian capital!</p>
-```
+Create a new scenario in Make and import the `make_blueprint.json` (having 3 modules: BigQuery, Text Aggreagator and Send an Email)
 
 ### **3. Set up Automation to Run Daily (some time after the Daily Rainy Forecast scheduled query) :**
-After creating the scenario, set the automation to run daily (for example at **9:00 AM CET**). This will ensure you receive a daily email with the weather forecast for rainy locations.
+After creating the scenario, set the automation to run daily (for example at **8:30 AM CET**). This will ensure you receive a daily email with the weather forecast for rainy locations.
 
 ---
 

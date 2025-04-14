@@ -2,6 +2,8 @@ import requests
 from dotenv import load_dotenv
 import os
 from openai import OpenAI
+import logging
+import time
 
 # Load environment variables from .env file
 load_dotenv()
@@ -28,6 +30,9 @@ CITIES = [
 # OpenWeatherMap API URL
 URL = 'http://api.openweathermap.org/data/2.5/weather'
 
+# Set up logging
+logging.basicConfig(filename="error_log.txt", level=logging.ERROR)
+
 def generate_summary(weather_data):
     """Use OpenAI's GPT to generate a human-readable weather summary."""
 
@@ -44,20 +49,27 @@ def fetch_weather_data():
     weather_data = []
 
     for city in CITIES:
-        params = {'q': city, 'appid': API_KEY, 'units': 'metric'}
-        response = requests.get(URL, params=params)
-        
-        if response.status_code == 200:
-            city_data = response.json()
+        attempts = 3
+        for attempt in range(attempts):
+            try:
+                params = {'q': city, 'appid': API_KEY, 'units': 'metric'}
+                response = requests.get(URL, params=params)
 
-            # Generate the summary for the city using OpenAI's LLM
-            forecast_summary = generate_summary(city_data)
+                # If the response is successful, process the data
+                if response.status_code == 200:
+                    city_data = response.json()
 
-             # Add the generated summary to the city data
-            city_data['forecast_summary'] = forecast_summary
+                    # Generate the summary for the city using OpenAI's LLM
+                    forecast_summary = generate_summary(city_data)
+                    city_data['forecast_summary'] = forecast_summary
+                    weather_data.append(city_data)
+                    break  # Break the retry loop if successful
+                else:
+                    logging.error(f"Failed to get data for {city}. Status Code: {response.status_code}")
+                    time.sleep(5)  # Wait before retrying
 
-            weather_data.append(city_data)
-        else:
-            print(f"Failed to get data for {city} (Status Code: {response.status_code})")
+            except Exception as e:
+                logging.error(f"Error while fetching data for {city}: {e}")
+                time.sleep(5)  # Wait before retrying
 
     return weather_data
